@@ -1,8 +1,32 @@
+using BloggersHub.Data;
+using BloggersHub.Repository;
+using BloggersHub.Services;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContext<BlogDbContext>(options =>
+options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), builder =>
+{
+    builder.EnableRetryOnFailure(3, TimeSpan.FromSeconds(10), null);
+}));
 
-builder.Services.AddControllers();
+builder.Services.AddScoped<IBlogsService, BlogsService>();
+builder.Services.AddScoped<IBlogsRepository, BlogsRepository>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+
+builder.Services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
+{
+    builder.WithOrigins("http://localhost:5173")
+           .AllowAnyMethod()
+           .AllowAnyHeader();
+}));
+
+builder.Services.AddControllers().AddJsonOptions(x =>
+   x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles); 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -15,6 +39,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("MyPolicy");
 
 app.UseHttpsRedirection();
 
