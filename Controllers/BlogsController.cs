@@ -22,6 +22,14 @@ namespace BloggersHub.Controllers
             return Ok(posts);
         }
 
+        [HttpGet("myblogs")]
+        public async Task<IActionResult> GetMyBlogs()
+        {
+            var userId = 1;//hardcoded till firebase works
+            var posts = await _blogs.GetMyBlogs(userId);
+            return Ok(posts);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateBlogs([FromBody] BlogsDTO blogsDTO)
         {

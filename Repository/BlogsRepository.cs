@@ -25,5 +25,11 @@ namespace BloggersHub.Repository
             await _dbContext.SaveChangesAsync();
             return post.Entity.Id;
         }
+
+        public async Task<List<Blogs>> GetMyBlogs(int Id)
+        {
+            var posts = await _dbContext.Blogs.Where(x => x.UserId == Id).Include(p => p.Comments).ThenInclude(x => x.User).ToListAsync();
+            return posts;
+        }
     }
 }

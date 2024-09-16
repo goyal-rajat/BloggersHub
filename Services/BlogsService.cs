@@ -29,5 +29,11 @@ namespace BloggersHub.Services
             var post = await _repository.CreateBlog(blog);
             return post;
         }
+
+        public async Task<List<Blogs>> GetMyBlogs(int Id)
+        {
+            var posts = await _repository.GetBlogs();
+            return posts;
+        }
     }
 }
