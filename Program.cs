@@ -1,13 +1,49 @@
+using BloggersHub.Data;
+using BloggersHub.Repository;
+using BloggersHub.Services;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
+using FirebaseAdmin;
+using FirebaseAdmin.Auth;
+using Google.Apis.Auth.OAuth2;
+using BloggersHub.Middelware;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContext<BlogDbContext>(options =>
+options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), builder =>
+{
+    builder.EnableRetryOnFailure(3, TimeSpan.FromSeconds(10), null);
+}));
 
-builder.Services.AddControllers();
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromFile(@"C:\Users\10747559\Downloads\bloggershub-a6b28-firebase-adminsdk-ingp6-08cf3e5c64.json")
+});
+
+builder.Services.AddScoped<IBlogsService, BlogsService>();
+builder.Services.AddScoped<IBlogsRepository, BlogsRepository>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
+{
+    builder.AllowAnyOrigin()
+           .AllowAnyMethod()
+           .AllowAnyHeader();
+}));
+
+builder.Services.AddControllers().AddJsonOptions(x =>
+   x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles); 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -16,10 +52,18 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("MyPolicy");
+
+app.UseMiddleware<FirebaseAuthenticationMiddleware>();
+
+app.UseRouting();
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+//app.UseAuthorization();
 
-app.MapControllers();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
 
 app.Run();
