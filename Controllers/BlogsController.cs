@@ -3,6 +3,10 @@ using BloggersHub.Models;
 using BloggersHub.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using FirebaseAdmin.Auth;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 
 namespace BloggersHub.Controllers
 {
@@ -25,14 +29,15 @@ namespace BloggersHub.Controllers
         [HttpGet("myblogs")]
         public async Task<IActionResult> GetMyBlogs()
         {
-            var userId = 1;//hardcoded till firebase works
-            var posts = await _blogs.GetMyBlogs(userId);
+            //hardcoded till firebase works
+            var posts = await _blogs.GetMyBlogs();
             return Ok(posts);
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateBlogs([FromBody] BlogsDTO blogsDTO)
         {
+            //var user = _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var posts = await _blogs.CreateBlogs(blogsDTO);
             return Ok(posts);
         }

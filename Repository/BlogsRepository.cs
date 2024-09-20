@@ -15,7 +15,7 @@ namespace BloggersHub.Repository
         }
         public async Task<List<Models.Blogs>> GetBlogs()
         {
-            var posts = await _dbContext.Blogs.Include(p => p.Comments).ThenInclude(x => x.User).ToListAsync();
+            var posts = await _dbContext.Blogs.Include(p => p.Comments).ToListAsync();
             return posts;
         }
 
@@ -26,9 +26,9 @@ namespace BloggersHub.Repository
             return post.Entity.Id;
         }
 
-        public async Task<List<Blogs>> GetMyBlogs(int Id)
+        public async Task<List<Blogs>> GetMyBlogs(string userName)
         {
-            var posts = await _dbContext.Blogs.Where(x => x.UserId == Id).Include(p => p.Comments).ThenInclude(x => x.User).ToListAsync();
+            var posts = await _dbContext.Blogs.Where(x => x.UserName == userName).Include(p => p.Comments).ToListAsync();
             return posts;
         }
     }

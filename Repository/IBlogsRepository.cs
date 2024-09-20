@@ -7,6 +7,6 @@ namespace BloggersHub.Repository
     {
         public Task<int> CreateBlog(Blogs blogsDTO);
         public Task<List<Models.Blogs>> GetBlogs();
-        public Task<List<Models.Blogs>> GetMyBlogs(int Id);
+        public Task<List<Models.Blogs>> GetMyBlogs(string userName);
     }
 }
